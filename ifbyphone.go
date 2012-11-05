@@ -51,25 +51,27 @@ func (cg CallGraph) Draw() {
 
 func (cg CallGraph) distribution() (map[int64]int, error) {
 	dist := make(map[int64]int)
-	var key int64
 
-	for _, call := range cg.Records {
-		switch cg.Type {
-		case ByAgent:
-			key = call.AgentNumber
-		case ByDuration:
-			key = call.Duration
-		case ByHour:
-			callTime, err := time.Parse("2006-01-02 15:04:05", call.Created_at)
-			if err != nil {
-				return nil, err
-			}
-			key = int64(callTime.Hour())
-		default:
-			return nil, fmt.Errorf("Error: invalid CallType %v", cg.Type)
-		}
-		dist[key] = dist[key] + 1
-	}
+  switch cg.Type {
+  case ByAgent:
+    for _, call := range cg.Records {
+      dist[call.AgentNumber]++
+    }
+  case ByDuration:
+    for _, call := range cg.Records {
+      dist[call.Duration]++
+    }
+  case ByHour:
+    for _, call := range cg.Records {
+      callTime, err := time.Parse("2006-01-02 15:04:05", call.Created_at)
+      if err != nil {
+        return nil, err
+      }
+      dist[int64(callTime.Hour())]++
+    }
+  default:
+    return nil, fmt.Errorf("Error: invalid CallType %v", cg.Type)
+}
 	return dist, nil
 }
 
