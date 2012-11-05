@@ -73,6 +73,16 @@ func (cg CallGraph) distribution() (map[int64]int, error) {
 	return dist, nil
 }
 
+func (cg *CallGraph) filter() {
+  newRecords := make([]CallRecord, 0)
+  for _, call := range cg.Records {
+    if call.isCustomerCare() {
+      newRecords = append(newRecords, call)
+    }
+  }
+  cg.Records = newRecords
+}
+
 func callReader(start, end string) (io.Reader, error) {
 	ibpParams.Add("start_date", start)
 	ibpParams.Add("end_date", end)
@@ -108,15 +118,23 @@ func main() {
 		return
 	}
 
-	duration, err := CallGraph{ByDuration, calls}.distribution()
-	hour, err := CallGraph{ByHour, calls}.distribution()
-	agent, err := CallGraph{ByAgent, calls}.distribution()
+	duration := CallGraph{ByDuration, calls}
+	hour := CallGraph{ByHour, calls}
+	agent := CallGraph{ByAgent, calls}
+
+  duration.filter()
+  hour.filter()
+  agent.filter()
+
+  durGraph, err := duration.distribution()
+  hourGraph, err := hour.distribution()
+  agentGraph, err := agent.distribution()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 
-	fmt.Printf("Durations: %v\n", duration)
-	fmt.Printf("Hours: %v\n", hour)
-	fmt.Printf("Agents: %v\n", agent)
+	fmt.Printf("Durations: %v\n\n", durGraph)
+	fmt.Printf("Hours: %v\n\n", hourGraph)
+	fmt.Printf("Agents: %v\n\n", agentGraph)
 }
