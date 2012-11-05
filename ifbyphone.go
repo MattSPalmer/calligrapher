@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-  "flag"
+	"flag"
 	"fmt"
 	"github.com/MattSPalmer/objcsv"
 	"io"
@@ -90,12 +90,12 @@ func callReader(start, end string) (io.Reader, error) {
 }
 
 func main() {
-  var start, end string
+	var start, end string
 
-  flag.StringVar(&start, "s", "", "start date (\"YYYYMMDD\")")
-  flag.StringVar(&end, "e", "", "end date (\"YYYYMMDD\")")
+	flag.StringVar(&start, "s", "", "start date (\"YYYYMMDD\")")
+	flag.StringVar(&end, "e", "", "end date (\"YYYYMMDD\")")
 
-  flag.Parse()
+	flag.Parse()
 	r, err := callReader(start, end)
 	if err != nil {
 		fmt.Printf("%v\n", err)
