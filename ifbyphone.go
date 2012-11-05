@@ -52,37 +52,37 @@ func (cg CallGraph) Draw() {
 func (cg CallGraph) distribution() (map[int64]int, error) {
 	dist := make(map[int64]int)
 
-  switch cg.Type {
-  case ByAgent:
-    for _, call := range cg.Records {
-      dist[call.AgentNumber]++
-    }
-  case ByDuration:
-    for _, call := range cg.Records {
-      dist[call.Duration]++
-    }
-  case ByHour:
-    for _, call := range cg.Records {
-      callTime, err := time.Parse("2006-01-02 15:04:05", call.Created_at)
-      if err != nil {
-        return nil, err
-      }
-      dist[int64(callTime.Hour())]++
-    }
-  default:
-    return nil, fmt.Errorf("Error: invalid CallType %v", cg.Type)
-}
+	switch cg.Type {
+	case ByAgent:
+		for _, call := range cg.Records {
+			dist[call.AgentNumber]++
+		}
+	case ByDuration:
+		for _, call := range cg.Records {
+			dist[call.Duration]++
+		}
+	case ByHour:
+		for _, call := range cg.Records {
+			callTime, err := time.Parse("2006-01-02 15:04:05", call.Created_at)
+			if err != nil {
+				return nil, err
+			}
+			dist[int64(callTime.Hour())]++
+		}
+	default:
+		return nil, fmt.Errorf("Error: invalid CallType %v", cg.Type)
+	}
 	return dist, nil
 }
 
 func (cg *CallGraph) filter() {
-  newRecords := make([]CallRecord, 0)
-  for _, call := range cg.Records {
-    if call.isCustomerCare() {
-      newRecords = append(newRecords, call)
-    }
-  }
-  cg.Records = newRecords
+	newRecords := make([]CallRecord, 0)
+	for _, call := range cg.Records {
+		if call.isCustomerCare() {
+			newRecords = append(newRecords, call)
+		}
+	}
+	cg.Records = newRecords
 }
 
 func callReader(start, end string) (io.Reader, error) {
@@ -124,13 +124,13 @@ func main() {
 	hour := CallGraph{ByHour, calls}
 	agent := CallGraph{ByAgent, calls}
 
-  duration.filter()
-  hour.filter()
-  agent.filter()
+	duration.filter()
+	hour.filter()
+	agent.filter()
 
-  durGraph, err := duration.distribution()
-  hourGraph, err := hour.distribution()
-  agentGraph, err := agent.distribution()
+	durGraph, err := duration.distribution()
+	hourGraph, err := hour.distribution()
+	agentGraph, err := agent.distribution()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
