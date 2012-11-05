@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 )
 
 const (
@@ -17,26 +16,6 @@ const (
 	ByHour
 	ByDuration
 )
-
-type CallRecord struct {
-	Created_at   string
-	ActivityInfo string
-	CallerID     string
-	Duration     int64
-	AgentNumber  int64
-}
-
-func (cr CallRecord) isCustomerCare() bool {
-	query, err := regexp.Compile("Customer Care")
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-	return query.MatchString(cr.ActivityInfo)
-}
-
-func (cr CallRecord) isMissed() bool {
-	return cr.AgentNumber == 0
-}
 
 func callReader(start, end string) (io.Reader, error) {
 	ibpParams.Add("start_date", start)
