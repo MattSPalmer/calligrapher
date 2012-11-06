@@ -54,9 +54,9 @@ func main() {
 	hour := GraphByHour(calls)
 	agent := GraphByAgent(calls)
 
-	durGraph, err := duration.distribution()
-	hourGraph, err := hour.distribution()
-	agentGraph, err := agent.distribution()
+	durGraph, err := duration.Distribution()
+	hourGraph, err := hour.Distribution()
+	agentGraph, err := agent.Distribution()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return

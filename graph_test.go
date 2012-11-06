@@ -55,15 +55,15 @@ func TestFilter(t *testing.T) {
 }
 
 func TestDistribution(t *testing.T) {
-	distByHour, err := graphByHour.distribution()
+	distByHour, err := graphByHour.Distribution()
 	if err != nil {
 		t.Errorf("distribution(): %v\n", err)
 	}
-	distByDuration, err := graphByDuration.distribution()
+	distByDuration, err := graphByDuration.Distribution()
 	if err != nil {
 		t.Errorf("distribution(): %v\n", err)
 	}
-	distByAgent, err := graphByAgent.distribution()
+	distByAgent, err := graphByAgent.Distribution()
 	if err != nil {
 		t.Errorf("distribution(): %v\n", err)
 	}
@@ -84,6 +84,32 @@ func TestDistribution(t *testing.T) {
 }
 
 func TestDraw(t *testing.T) {
+	expectedHour := readTestFile("tests/byhour.txt")
+	expectedDuration := readTestFile("tests/byduration.txt")
+	expectedAgent := readTestFile("tests/byagent.txt")
+
+	hourDraw, err := Draw(graphByHour)
+	if err != nil {
+		t.Errorf("draw error: %v\n", err)
+	}
+	durationDraw, err := Draw(graphByDuration)
+	if err != nil {
+		t.Errorf("draw error: %v\n", err)
+	}
+	agentDraw, err := Draw(graphByAgent)
+	if err != nil {
+		t.Errorf("draw error: %v\n", err)
+	}
+
+	if hourDraw != expectedHour {
+		t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expectedHour, hourDraw)
+	}
+	if durationDraw != expectedDuration {
+		t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expectedDuration, durationDraw)
+	}
+	if agentDraw != expectedAgent {
+		t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expectedAgent, agentDraw)
+	}
 }
 
 func readTestFile(inS string) string {

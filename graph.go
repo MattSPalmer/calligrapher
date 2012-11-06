@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -30,20 +31,40 @@ func (cr CallRecord) isMissed() bool {
 	return cr.AgentNumber == 0
 }
 
+func filter(g *[]CallRecord) {
+	newRecords := make([]CallRecord, 0)
+	for _, call := range *g {
+		if call.isCustomerCare() {
+			newRecords = append(newRecords, call)
+		}
+	}
+	g = &newRecords
+}
+
 type CallGraph interface {
-	DrawRow() string
-	Distribution() map[int64]int
+	DrawRows(int64, int) string
+	Distribution() (map[int64]int, error)
 }
 
 func Draw(g CallGraph) (string, error) {
-	return "", nil
+	strSlice := make([]string, 0)
+	strSlice = append(strSlice, frameRow)
+	dist, err := g.Distribution()
+	if err != nil {
+		return "", err
+	}
+	for k, v := range dist {
+		strSlice = append(strSlice, g.DrawRows(k, v))
+	}
+	strSlice = append(strSlice, frameRow)
+	return strings.Join(strSlice, "\n"), nil
 }
 
 type GraphByHour []CallRecord
 type GraphByDuration []CallRecord
 type GraphByAgent []CallRecord
 
-func (bh GraphByHour) distribution() (map[int64]int, error) {
+func (bh GraphByHour) Distribution() (map[int64]int, error) {
 	dist := make(map[int64]int)
 	for _, call := range bh {
 		callTime, err := time.Parse("2006-01-02 15:04:05", call.Created_at)
@@ -55,7 +76,7 @@ func (bh GraphByHour) distribution() (map[int64]int, error) {
 	return dist, nil
 }
 
-func (bd GraphByDuration) distribution() (map[int64]int, error) {
+func (bd GraphByDuration) Distribution() (map[int64]int, error) {
 	dist := make(map[int64]int)
 	for _, call := range bd {
 		dist[call.Duration]++
@@ -63,7 +84,7 @@ func (bd GraphByDuration) distribution() (map[int64]int, error) {
 	return dist, nil
 }
 
-func (ba GraphByAgent) distribution() (map[int64]int, error) {
+func (ba GraphByAgent) Distribution() (map[int64]int, error) {
 	dist := make(map[int64]int)
 	for _, call := range ba {
 		dist[call.AgentNumber]++
@@ -71,12 +92,14 @@ func (ba GraphByAgent) distribution() (map[int64]int, error) {
 	return dist, nil
 }
 
-func filter(g *[]CallRecord) {
-	newRecords := make([]CallRecord, 0)
-	for _, call := range *g {
-		if call.isCustomerCare() {
-			newRecords = append(newRecords, call)
-		}
-	}
-	g = &newRecords
+func (bh GraphByHour) DrawRows(k int64, v int) string {
+	return ""
+}
+
+func (bd GraphByDuration) DrawRows(k int64, v int) string {
+	return ""
+}
+
+func (ba GraphByAgent) DrawRows(k int64, v int) string {
+	return ""
 }
