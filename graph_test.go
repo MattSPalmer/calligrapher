@@ -1,6 +1,9 @@
 package main
 
 import (
+	// "fmt"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -14,6 +17,10 @@ var testRecords = []CallRecord{
 	CallRecord{"2012-10-04 13:02:00", "POS Specialist", "4549091415", 0, 0},
 	CallRecord{"2012-10-04 13:02:00", "I don't even know", "4549091415", 7, 5550001111},
 }
+
+var graphByHour = GraphByHour(testRecords)
+var graphByDuration = GraphByDuration(testRecords)
+var graphByAgent = GraphByAgent(testRecords)
 
 func TestIsCustomerCare(t *testing.T) {
 	expected := []bool{true, true, true, false, true, false, false}
@@ -34,9 +41,13 @@ func TestIsMissed(t *testing.T) {
 }
 
 func TestFilter(t *testing.T) {
-	graph := CallGraph{ByAgent, testRecords}
-	graph.filter()
-	for _, call := range graph.Records {
+	testCopy := make([]CallRecord, 0)
+	copy(testRecords, testCopy)
+
+	filter(&testCopy)
+	graph := GraphByAgent(testCopy)
+
+	for _, call := range graph {
 		if !call.isCustomerCare() {
 			t.Errorf("expected to find no non-Customer Care calls, but found\n%v", call)
 		}
@@ -44,15 +55,15 @@ func TestFilter(t *testing.T) {
 }
 
 func TestDistribution(t *testing.T) {
-	distByHour, err := CallGraph{ByHour, testRecords}.distribution()
+	distByHour, err := graphByHour.distribution()
 	if err != nil {
 		t.Errorf("distribution(): %v\n", err)
 	}
-	distByDuration, err := CallGraph{ByDuration, testRecords}.distribution()
+	distByDuration, err := graphByDuration.distribution()
 	if err != nil {
 		t.Errorf("distribution(): %v\n", err)
 	}
-	distByAgent, err := CallGraph{ByAgent, testRecords}.distribution()
+	distByAgent, err := graphByAgent.distribution()
 	if err != nil {
 		t.Errorf("distribution(): %v\n", err)
 	}
@@ -70,4 +81,14 @@ func TestDistribution(t *testing.T) {
 	if !reflect.DeepEqual(distByAgent, expectedByAgent) {
 		t.Errorf("distribution by agent: expected %v, got %v", expectedByAgent, distByAgent)
 	}
+}
+
+func TestDraw(t *testing.T) {
+}
+
+func readTestFile(inS string) string {
+	f, _ := os.Open(inS)
+	defer f.Close()
+	outS, _ := ioutil.ReadAll(f)
+	return string(outS)
 }

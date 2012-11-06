@@ -48,13 +48,11 @@ func main() {
 		return
 	}
 
-	duration := CallGraph{ByDuration, calls}
-	hour := CallGraph{ByHour, calls}
-	agent := CallGraph{ByAgent, calls}
+	filter(&calls)
 
-	duration.filter()
-	hour.filter()
-	agent.filter()
+	duration := GraphByDuration(calls)
+	hour := GraphByHour(calls)
+	agent := GraphByAgent(calls)
 
 	durGraph, err := duration.distribution()
 	hourGraph, err := hour.distribution()
