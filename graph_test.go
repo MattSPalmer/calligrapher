@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -116,5 +115,6 @@ func readTestFile(inS string) string {
 	f, _ := os.Open(inS)
 	defer f.Close()
 	outS, _ := ioutil.ReadAll(f)
-	return string(outS)
+    // Exclude last character (EOF)
+    return string(outS)[:len(string(outS))-1]
 }

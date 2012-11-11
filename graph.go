@@ -42,21 +42,20 @@ func filter(g *[]CallRecord) {
 }
 
 type CallGraph interface {
-	DrawRows(int64, int) string
 	Distribution() (map[int64]int, error)
+	DrawRows() (s string, err error)
 }
 
 func Draw(g CallGraph) (string, error) {
+
+    s, err := g.DrawRows()
+    if err != nil {
+      return "", err
+    }
+
 	strSlice := make([]string, 0)
-	strSlice = append(strSlice, frameRow)
-	dist, err := g.Distribution()
-	if err != nil {
-		return "", err
-	}
-	for k, v := range dist {
-		strSlice = append(strSlice, g.DrawRows(k, v))
-	}
-	strSlice = append(strSlice, frameRow)
+	strSlice = append(strSlice, frameRow, s, frameRow)
+
 	return strings.Join(strSlice, "\n"), nil
 }
 
@@ -92,14 +91,26 @@ func (ba GraphByAgent) Distribution() (map[int64]int, error) {
 	return dist, nil
 }
 
-func (bh GraphByHour) DrawRows(k int64, v int) string {
-	return ""
+func (bh GraphByHour) DrawRows() (s string, err error) {
+	dist, err := bh.Distribution()
+	if err != nil {
+		return "", err
+	}
+	rows := make([]string, 0)
+	for i := int64(0); i < 24; i++ {
+		row := fmt.Sprintf("%02v|", i)
+		for j := 0; j < dist[i]; j++ {
+			row += " +"
+		}
+		rows = append(rows, row)
+	}
+	return strings.Join(rows, "\n"), err
 }
 
-func (bd GraphByDuration) DrawRows(k int64, v int) string {
-	return ""
+func (bd GraphByDuration) DrawRows() (s string, err error) {
+	return
 }
 
-func (ba GraphByAgent) DrawRows(k int64, v int) string {
-	return ""
+func (ba GraphByAgent) DrawRows() (s string, err error) {
+	return
 }
