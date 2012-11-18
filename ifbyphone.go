@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"github.com/MattSPalmer/objcsv"
 	"io"
@@ -34,35 +35,50 @@ func callReader(start, end string) (io.Reader, error) {
 }
 
 func main() {
-	flagInit()
+	flag.Parse()
 
-	r, err := callReader(start, end)
+	r, err := callReader(*start, *end)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
+
+	callsFromFile := make([]callRecordFromFile, 0)
+	err = objcsv.ReadCSV(r, &callsFromFile)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
 	calls := make([]CallRecord, 0)
-	err = objcsv.ReadCSV(r, &calls)
+	calls, err = batchConvert(callsFromFile)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 
-	filter(&calls)
+	calls = Filter(calls, func(cr CallRecord) bool {
+		return cr.IsCustomerCare
+	})
 
 	duration := GraphByDuration(calls)
 	hour := GraphByHour(calls)
+
+	calls = Filter(calls, func(cr CallRecord) bool {
+		return !cr.IsMissed
+	})
+
 	agent := GraphByAgent(calls)
 
-	durGraph, err := duration.Distribution()
-	hourGraph, err := hour.Distribution()
-	agentGraph, err := agent.Distribution()
+	durGraph, err := Draw(duration)
+	hourGraph, err := Draw(hour)
+	agentGraph, err := Draw(agent)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 
-	fmt.Printf("Durations: %v\n\n", durGraph)
-	fmt.Printf("Hours: %v\n\n", hourGraph)
-	fmt.Printf("Agents: %v\n\n", agentGraph)
+	fmt.Printf("Hours:\n%v\n\n", hourGraph)
+	fmt.Printf("Durations:\n%v\n\n", durGraph)
+	fmt.Printf("Agents:\n%v\n\n", agentGraph)
 }

@@ -2,11 +2,9 @@ package main
 
 import "flag"
 
-var start, end string
+var (
+	start = flag.String("s", "", "start date (\"YYYYMMDD\")")
+	end   = flag.String("e", "", "end date (\"YYYYMMDD\")")
 
-func flagInit() {
-	flag.StringVar(&start, "s", "", "start date (\"YYYYMMDD\")")
-	flag.StringVar(&end, "e", "", "end date (\"YYYYMMDD\")")
-
-	flag.Parse()
-}
+	all = flag.String("", "", "")
+)
