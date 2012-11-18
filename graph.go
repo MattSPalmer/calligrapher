@@ -2,56 +2,23 @@ package main
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
-	"time"
 )
 
-const (
-	frameRow = "================================================================================"
+var (
+	frameRow = strings.Repeat("=", 80)
 )
-
-type CallRecord struct {
-	Created_at   string
-	ActivityInfo string
-	CallerID     string
-	Duration     int64
-	AgentNumber  int64
-}
-
-func (cr CallRecord) isCustomerCare() bool {
-	query, err := regexp.Compile("Customer Care")
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-	return query.MatchString(cr.ActivityInfo)
-}
-
-func (cr CallRecord) isMissed() bool {
-	return cr.AgentNumber == 0
-}
-
-func filter(g *[]CallRecord) {
-	newRecords := make([]CallRecord, 0)
-	for _, call := range *g {
-		if call.isCustomerCare() {
-			newRecords = append(newRecords, call)
-		}
-	}
-	g = &newRecords
-}
 
 type CallGraph interface {
-	Distribution() (map[int64]int, error)
+	Distribution() (map[int64][]CallRecord, error)
 	DrawRows() (s string, err error)
 }
 
 func Draw(g CallGraph) (string, error) {
-
-    s, err := g.DrawRows()
-    if err != nil {
-      return "", err
-    }
+	s, err := g.DrawRows()
+	if err != nil {
+		return "", err
+	}
 
 	strSlice := make([]string, 0)
 	strSlice = append(strSlice, frameRow, s, frameRow)
@@ -63,30 +30,32 @@ type GraphByHour []CallRecord
 type GraphByDuration []CallRecord
 type GraphByAgent []CallRecord
 
-func (bh GraphByHour) Distribution() (map[int64]int, error) {
-	dist := make(map[int64]int)
+func (bh GraphByHour) Distribution() (map[int64][]CallRecord, error) {
+	dist := make(map[int64][]CallRecord)
+	var key int64
 	for _, call := range bh {
-		callTime, err := time.Parse("2006-01-02 15:04:05", call.Created_at)
-		if err != nil {
-			return nil, err
-		}
-		dist[int64(callTime.Hour())]++
+		key = int64(call.Created_at.Hour())
+		dist[key] = append(dist[key], call)
 	}
 	return dist, nil
 }
 
-func (bd GraphByDuration) Distribution() (map[int64]int, error) {
-	dist := make(map[int64]int)
+func (bd GraphByDuration) Distribution() (map[int64][]CallRecord, error) {
+	dist := make(map[int64][]CallRecord)
+	var key int64
 	for _, call := range bd {
-		dist[call.Duration]++
+		key = call.Duration
+		dist[key] = append(dist[key], call)
 	}
 	return dist, nil
 }
 
-func (ba GraphByAgent) Distribution() (map[int64]int, error) {
-	dist := make(map[int64]int)
+func (ba GraphByAgent) Distribution() (map[int64][]CallRecord, error) {
+	dist := make(map[int64][]CallRecord)
+	var key int64
 	for _, call := range ba {
-		dist[call.AgentNumber]++
+		key = call.AgentID
+		dist[key] = append(dist[key], call)
 	}
 	return dist, nil
 }
@@ -94,13 +63,30 @@ func (ba GraphByAgent) Distribution() (map[int64]int, error) {
 func (bh GraphByHour) DrawRows() (s string, err error) {
 	dist, err := bh.Distribution()
 	if err != nil {
-		return "", err
+		return
 	}
 	rows := make([]string, 0)
 	for i := int64(0); i < 24; i++ {
+		// Begin row with the row name (hour)
 		row := fmt.Sprintf("%02v|", i)
-		for j := 0; j < dist[i]; j++ {
-			row += " +"
+
+		// Iterate over calls that occurred in hour i
+		for _, call := range dist[i] {
+			if !call.IsMissed {
+				// Get first character of agent name
+				var (
+					char string
+					val  string
+				)
+				if val = agentsByID[call.AgentID]; val != "" {
+					char = string(val[0])
+				} else {
+					char = "?"
+				}
+				row += fmt.Sprintf(" %v", char)
+			} else {
+				row += " -"
+			}
 		}
 		rows = append(rows, row)
 	}
@@ -108,9 +94,46 @@ func (bh GraphByHour) DrawRows() (s string, err error) {
 }
 
 func (bd GraphByDuration) DrawRows() (s string, err error) {
-	return
+	dist, err := bd.Distribution()
+	if err != nil {
+		return
+	}
+	rows := make([]string, 12)
+	for i := 0; i < 11; i++ {
+		rows[i] = fmt.Sprintf("%02d-%02d|", 5*i, 5*(i+1))
+	}
+	rows[11] = "  60+|"
+	var (
+		counts = make(map[int64]int)
+	)
+	for k, v := range dist {
+		for _, call := range v {
+			if !call.IsMissed && call.IsCustomerCare {
+				if k/5 > 10 {
+					counts[11] += 1
+				} else {
+					counts[k/5] += 1
+				}
+			}
+		}
+	}
+	for k, v := range counts {
+		rows[k] += fmt.Sprintf(" %d", v)
+	}
+	return strings.Join(rows, "\n"), err
 }
 
 func (ba GraphByAgent) DrawRows() (s string, err error) {
-	return
+	dist, err := ba.Distribution()
+	if err != nil {
+		return
+	}
+
+	rows := make([]string, 0)
+
+	for k, v := range dist {
+		rows = append(rows, fmt.Sprintf("%9v|", agentsByID[k]))
+		rows[len(rows)-1] += fmt.Sprintf(" %d", len(v))
+	}
+	return strings.Join(rows, "\n"), err
 }

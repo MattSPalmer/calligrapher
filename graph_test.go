@@ -1,58 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
 )
 
-var testRecords = []CallRecord{
-	CallRecord{"2012-10-01 12:00:00", "Customer Care", "5559426524", 5, 5550001111},
-	CallRecord{"2012-10-03 16:21:00", "Customer Care", "5559192426", 5, 5550001112},
-	CallRecord{"2012-10-03 04:24:00", "Customer Care", "5556842575", 0, 0},
-	CallRecord{"2012-10-03 12:00:00", "POS Specialist", "5324205192", 5, 5550001111},
-	CallRecord{"2012-10-04 23:03:00", "Customer Care", "8344988928", 5, 5550001113},
-	CallRecord{"2012-10-04 13:02:00", "POS Specialist", "4549091415", 0, 0},
-	CallRecord{"2012-10-04 13:02:00", "I don't even know", "4549091415", 7, 5550001111},
-}
-
 var graphByHour = GraphByHour(testRecords)
 var graphByDuration = GraphByDuration(testRecords)
 var graphByAgent = GraphByAgent(testRecords)
 
-func TestIsCustomerCare(t *testing.T) {
-	expected := []bool{true, true, true, false, true, false, false}
-	for i, call := range testRecords {
-		if call.isCustomerCare() != expected[i] {
-			t.Errorf("expected %v, got %v for testRecords[%v] from isCustomerCare()", expected[i], call.isCustomerCare(), i)
-		}
-	}
-}
-
-func TestIsMissed(t *testing.T) {
-	expected := []bool{false, false, true, false, false, true, false}
-	for i, call := range testRecords {
-		if call.isMissed() != expected[i] {
-			t.Errorf("expected %v, got %v for testRecords[%v] from isMissed()", expected[i], call.isMissed(), i)
-		}
-	}
-}
-
-func TestFilter(t *testing.T) {
-	testCopy := make([]CallRecord, 0)
-	copy(testRecords, testCopy)
-
-	filter(&testCopy)
-	graph := GraphByAgent(testCopy)
-
-	for _, call := range graph {
-		if !call.isCustomerCare() {
-			t.Errorf("expected to find no non-Customer Care calls, but found\n%v", call)
-		}
-	}
-}
-
+// Tests
 func TestDistribution(t *testing.T) {
 	distByHour, err := graphByHour.Distribution()
 	if err != nil {
@@ -67,12 +27,30 @@ func TestDistribution(t *testing.T) {
 		t.Errorf("distribution(): %v\n", err)
 	}
 
-	expectedByHour := map[int64]int{12: 2, 13: 2, 16: 1, 23: 1, 4: 1}
-	expectedByDuration := map[int64]int{5: 4, 0: 2, 7: 1}
-	expectedByAgent := map[int64]int{5550001111: 3, 5550001112: 1, 5550001113: 1, 0: 2}
+	expectedByHour := map[int64][]CallRecord{
+		12: []CallRecord{expectedRecords[0], expectedRecords[3]},
+		13: []CallRecord{expectedRecords[5], expectedRecords[6]},
+		16: []CallRecord{expectedRecords[1]},
+		23: []CallRecord{expectedRecords[4]},
+		4:  []CallRecord{expectedRecords[2]},
+	}
+	expectedByDuration := map[int64][]CallRecord{
+		5: []CallRecord{expectedRecords[0], expectedRecords[1], expectedRecords[3], expectedRecords[4]},
+		0: []CallRecord{expectedRecords[2], expectedRecords[5]},
+		7: []CallRecord{expectedRecords[6]},
+	}
+	expectedByAgent := map[int64][]CallRecord{
+		20: []CallRecord{expectedRecords[0], expectedRecords[3], expectedRecords[6]},
+		21: []CallRecord{expectedRecords[1]},
+		22: []CallRecord{expectedRecords[4]},
+		0:  []CallRecord{expectedRecords[2], expectedRecords[5]},
+	}
 
 	if !reflect.DeepEqual(distByHour, expectedByHour) {
 		t.Errorf("distribution by hour: expected %v, got %v", expectedByHour, distByHour)
+		for k, v := range distByHour {
+			fmt.Printf("%v\n%v\n%v\n\n", k, expectedByHour[k], v)
+		}
 	}
 	if !reflect.DeepEqual(distByDuration, expectedByDuration) {
 		t.Errorf("distribution by duration: expected %v, got %v", expectedByDuration, distByDuration)
@@ -115,6 +93,6 @@ func readTestFile(inS string) string {
 	f, _ := os.Open(inS)
 	defer f.Close()
 	outS, _ := ioutil.ReadAll(f)
-    // Exclude last character (EOF)
-    return string(outS)[:len(string(outS))-1]
+	// Exclude last character (EOF)
+	return string(outS)[:len(string(outS))-1]
 }
