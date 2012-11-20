@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"github.com/MattSPalmer/objcsv"
 	"io"
@@ -35,9 +34,13 @@ func callReader(start, end string) (io.Reader, error) {
 }
 
 func main() {
-	flag.Parse()
+	err := handleArgs()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+        return
+	}
 
-	r, err := callReader(*start, *end)
+	r, err := callReader(start, end)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
