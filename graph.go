@@ -66,7 +66,7 @@ func (bh GraphByHour) DrawRows() (s string, err error) {
 		return
 	}
 	rows := make([]string, 0)
-	for i := int64(0); i < 24; i++ {
+	for i := int64(8); i < 21; i++ {
 		// Begin row with the row name (hour)
 		row := fmt.Sprintf("%02v|", i)
 
