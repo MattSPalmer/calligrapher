@@ -37,7 +37,7 @@ func main() {
 	err := handleArgs()
 	if err != nil {
 		fmt.Printf("%v\n", err)
-        return
+		return
 	}
 
 	r, err := callReader(start, end)
@@ -64,24 +64,30 @@ func main() {
 		return cr.IsCustomerCare
 	})
 
-	duration := GraphByDuration(calls)
-	hour := GraphByHour(calls)
-
-	calls = Filter(calls, func(cr CallRecord) bool {
-		return !cr.IsMissed
-	})
-
-	agent := GraphByAgent(calls)
-
-	durGraph, err := Draw(duration)
-	hourGraph, err := Draw(hour)
-	agentGraph, err := Draw(agent)
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		return
+	if showDuration {
+		durGraph, err := Draw(GraphByDuration(calls))
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+		fmt.Printf("Durations:\n%v\n\n", durGraph)
 	}
 
-	fmt.Printf("Hours:\n%v\n\n", hourGraph)
-	fmt.Printf("Durations:\n%v\n\n", durGraph)
-	fmt.Printf("Agents:\n%v\n\n", agentGraph)
+	if showHour {
+		hourGraph, err := Draw(GraphByHour(calls))
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+		fmt.Printf("Hours:\n%v\n\n", hourGraph)
+	}
+
+	if showAgent {
+		calls = Filter(calls, func(cr CallRecord) bool {
+			return !cr.IsMissed
+		})
+		agentGraph, err := Draw(GraphByAgent(calls))
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+		fmt.Printf("Agents:\n%v\n\n", agentGraph)
+	}
 }

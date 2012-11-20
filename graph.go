@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -52,9 +53,8 @@ func (bd GraphByDuration) Distribution() (map[int64][]CallRecord, error) {
 
 func (ba GraphByAgent) Distribution() (map[int64][]CallRecord, error) {
 	dist := make(map[int64][]CallRecord)
-	var key int64
 	for _, call := range ba {
-		key = call.AgentID
+		key := call.AgentID
 		dist[key] = append(dist[key], call)
 	}
 	return dist, nil
@@ -135,6 +135,13 @@ func (ba GraphByAgent) DrawRows() (s string, err error) {
 		if k == -1 {
 			continue
 		}
+		var agentName string
+		if val, ok := agentsByID[k]; ok {
+			agentName = val
+		} else {
+			agentName = strconv.FormatInt(k, 10)
+		}
+		rows = append(rows, fmt.Sprintf("%9v|", agentName))
 		rows[len(rows)-1] += fmt.Sprintf(" %d", len(v))
 	}
 	return strings.Join(rows, "\n"), err

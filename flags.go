@@ -8,12 +8,22 @@ import (
 )
 
 var (
-	start, end string
+	start, end                        string
+	showAgent, showDuration, showHour bool
 )
 
 func handleArgs() error {
 	var e error
+
+	flag.BoolVar(&showAgent, "a", false, "show a breakdown of calls by agent")
+	flag.BoolVar(&showDuration, "d", false, "show a breakdown of calls by duration")
+	flag.BoolVar(&showHour, "c", false, "show a breakdown of calls by hour")
+
 	flag.Parse()
+
+	if !showHour && !showAgent && !showDuration {
+		showHour = true
+	}
 
 	if start, e = formatDateString(flag.Arg(0)); e != nil {
 		return e
