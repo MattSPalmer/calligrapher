@@ -132,7 +132,9 @@ func (ba GraphByAgent) DrawRows() (s string, err error) {
 	rows := make([]string, 0)
 
 	for k, v := range dist {
-		rows = append(rows, fmt.Sprintf("%9v|", agentsByID[k]))
+		if k == -1 {
+			continue
+		}
 		rows[len(rows)-1] += fmt.Sprintf(" %d", len(v))
 	}
 	return strings.Join(rows, "\n"), err

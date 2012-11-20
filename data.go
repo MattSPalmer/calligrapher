@@ -75,6 +75,11 @@ func (cr callRecordFromFile) convert() (out CallRecord, err error) {
 		Duration:       cr.Duration,
 		AgentID:        agentsByNumber[cr.AgentNumber],
 	}
+	if val, ok := agentsByNumber[cr.AgentNumber]; ok {
+		out.AgentID = val
+	} else {
+		out.AgentID = -1
+	}
 	out.Created_at, err = time.Parse("2006-01-02 15:04:05", cr.Created_at)
 	if err != nil {
 		return
