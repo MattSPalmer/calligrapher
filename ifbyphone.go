@@ -11,10 +11,6 @@ import (
 
 const (
 	APIUrl = "https://secure.ifbyphone.com/ibp_api.php?"
-
-	ByAgent int = iota
-	ByHour
-	ByDuration
 )
 
 func callReader(start, end string) (io.Reader, error) {

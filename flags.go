@@ -8,8 +8,10 @@ import (
 )
 
 var (
-	start, end                        string
-	showAgent, showDuration, showHour bool
+	start, end   string
+	showAgent    bool
+	showDuration bool
+	showHour     bool
 )
 
 func handleArgs() error {
