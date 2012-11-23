@@ -190,6 +190,7 @@ func (ba GraphByAgent) DrawRows() (s string, err error) {
 
 type Table [][]string
 
+// Implement sort for Table so we can output nicely sorted CSV files.
 func (t Table) Less(i, j int) bool { return t[i][0] < t[j][0] }
 func (t Table) Len() int           { return len(t) }
 func (t Table) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }

@@ -3,16 +3,22 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/MattSPalmer/objcsv"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"time"
 )
 
 const (
 	APIUrl    = "https://secure.ifbyphone.com/ibp_api.php?"
 	extension = "csv"
+)
+
+var (
+	filterCriteria = map[string](func(CallRecord) bool){
+		"customer care":   func(cr CallRecord) bool { return cr.IsCustomerCare },
+		"answered":        func(cr CallRecord) bool { return !cr.IsMissed },
+		"during business": func(cr CallRecord) bool { return cr.IsMissed },
+	}
 )
 
 func callReader(start, end string) (io.Reader, error) {
@@ -38,29 +44,14 @@ func main() {
 		return
 	}
 
-	r, err := callReader(start, end)
+	// The output of this function depends on the toFile flag.
+	calls, err := getCallsByDate(start, end)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 
-	callsFromFile := make([]callRecordFromFile, 0)
-	err = objcsv.ReadCSV(r, &callsFromFile)
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		return
-	}
-
-	calls := make([]CallRecord, 0)
-	calls, err = batchConvert(callsFromFile)
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		return
-	}
-
-	calls = Filter(calls, func(cr CallRecord) bool {
-		return cr.IsCustomerCare
-	})
+	calls = Filter(calls, filterCriteria["customer care"])
 
 	var data CallGraph
 
@@ -76,20 +67,8 @@ func main() {
 		return
 	}
 
-	if *toFile {
-		ds := time.Now().Format("01-02-06_15:04:05")
-		filePath := fmt.Sprintf("call_graph_%v.%v", ds, extension)
-		err := WriteToCSV(data, filePath)
-		if err != nil {
-			fmt.Printf("%v\n", err)
-			return
-		}
-		fmt.Printf("Wrote results to file %v\n\n", filePath)
-	}
-
-	graph, err := Draw(data)
-	if err != nil {
+	if err := graphOutput(data); err != nil {
 		fmt.Printf("%v\n", err)
+		return
 	}
-	fmt.Println(graph)
 }
