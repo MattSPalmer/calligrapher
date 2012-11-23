@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	APIUrl = "https://secure.ifbyphone.com/ibp_api.php?"
+	APIUrl    = "https://secure.ifbyphone.com/ibp_api.php?"
+	extension = "csv"
 )
 
 func callReader(start, end string) (io.Reader, error) {
@@ -61,34 +62,34 @@ func main() {
 		return cr.IsCustomerCare
 	})
 
-    var data CallGraph
+	var data CallGraph
 
-    switch *graphType {
-    case "duration":
-        data = GraphByDuration(calls)
-    case "agent":
-        data = GraphByAgent(calls)
-    case "hour":
-        data = GraphByHour(calls)
-    default:
-        fmt.Printf("invalid graphType specifed: %v", *graphType)
-        return
-    }
+	switch *graphType {
+	case "duration":
+		data = GraphByDuration(calls)
+	case "agent":
+		data = GraphByAgent(calls)
+	case "hour":
+		data = GraphByHour(calls)
+	default:
+		fmt.Printf("invalid graphType specifed: %v", *graphType)
+		return
+	}
 
 	if *toFile {
 		ds := time.Now().Format("01-02-06_15:04:05")
-		filePath := fmt.Sprintf("call_graph_%v.csv", ds)
-        err := WriteToCSV(data, filePath)
-        if err != nil {
-            fmt.Printf("%v\n", err)
-            return
-        }
+		filePath := fmt.Sprintf("call_graph_%v.%v", ds, extension)
+		err := WriteToCSV(data, filePath)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return
+		}
 		fmt.Printf("Wrote results to file %v\n\n", filePath)
 	}
 
-    graph, err := Draw(data)
-    if err != nil {
-        fmt.Printf("%v\n", err)
-    }
-    fmt.Println(graph)
+	graph, err := Draw(data)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	fmt.Println(graph)
 }

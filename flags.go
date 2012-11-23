@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	start, end   string
-    graphType = flag.String("g", "hour", "graph by agent, duration or call time")
-	toFile       = flag.Bool("f", false, "write results to a CSV file")
+	start, end string
+	graphType  = flag.String("g", "hour", "graph by agent, duration or call time")
+	toFile     = flag.Bool("f", false, "write results to a CSV file")
 )
 
 func handleArgs() error {
@@ -50,5 +50,5 @@ func formatDateString(s string) (string, error) {
 			return "2012" + s, nil
 		}
 	}
-	return "", fmt.Errorf("formatDateString: with string %v, something happened that should never happen.", s)
+	return "", fmt.Errorf("formatDateString: invalid date string %v", s)
 }
