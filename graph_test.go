@@ -61,31 +61,23 @@ func TestDistribution(t *testing.T) {
 }
 
 func TestDraw(t *testing.T) {
-	expectedHour := readTestFile("tests/byhour.txt")
-	expectedDuration := readTestFile("tests/byduration.txt")
-	expectedAgent := readTestFile("tests/byagent.txt")
+	expected := make([]string, 3)
+	actual := make([]string, 3)
+	testRecs := []CallGraph{graphByHour, graphByDuration, graphByAgent}
 
-	hourDraw, err := Draw(graphByHour)
-	if err != nil {
-		t.Errorf("draw error: %v\n", err)
-	}
-	durationDraw, err := Draw(graphByDuration)
-	if err != nil {
-		t.Errorf("draw error: %v\n", err)
-	}
-	agentDraw, err := Draw(graphByAgent)
-	if err != nil {
-		t.Errorf("draw error: %v\n", err)
-	}
+	expected[0] = readTestFile("tests/byhour.txt")
+	expected[1] = readTestFile("tests/byduration.txt")
+	expected[2] = readTestFile("tests/byagent.txt")
 
-	if hourDraw != expectedHour {
-		t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expectedHour, hourDraw)
-	}
-	if durationDraw != expectedDuration {
-		t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expectedDuration, durationDraw)
-	}
-	if agentDraw != expectedAgent {
-		t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expectedAgent, agentDraw)
+	for i := 0; i < 3; i++ {
+		var err error
+		actual[i], err = Draw(testRecs[i])
+		if err != nil {
+			t.Errorf("draw error: %v\n", err)
+		}
+		if actual[i] != expected[i] {
+			t.Errorf("graph mismatch: expected:\n%v\nbut got:\n%v\n", expected[i], actual[i])
+		}
 	}
 }
 
