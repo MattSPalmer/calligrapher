@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	extension = "csv"
+)
+
 func getCallsByDate(start, end string) ([]CallRecord, error) {
 	r, err := callReader(start, end)
 	if err != nil {

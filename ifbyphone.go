@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	APIUrl    = "https://secure.ifbyphone.com/ibp_api.php?"
-	extension = "csv"
+	APIUrl = "https://secure.ifbyphone.com/ibp_api.php?"
 )
 
 var (
