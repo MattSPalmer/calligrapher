@@ -9,9 +9,7 @@ import (
 
 var (
 	start, end   string
-	showAgent    = flag.Bool("a", false, "show a breakdown of calls by agent")
-	showDuration = flag.Bool("d", false, "show a breakdown of calls by duration")
-	showHour     = flag.Bool("c", false, "show a breakdown of calls by hour")
+    graphType = flag.String("g", "hour", "graph by agent, duration or call time")
 	toFile       = flag.Bool("f", false, "write results to a CSV file")
 )
 
@@ -19,10 +17,6 @@ func handleArgs() error {
 	var e error
 
 	flag.Parse()
-
-	if !*showHour && !*showAgent && !*showDuration {
-		*showHour = true
-	}
 
 	if start, e = formatDateString(flag.Arg(0)); e != nil {
 		return e
