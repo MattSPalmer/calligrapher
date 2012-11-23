@@ -9,22 +9,19 @@ import (
 
 var (
 	start, end   string
-	showAgent    bool
-	showDuration bool
-	showHour     bool
+	showAgent    = flag.Bool("a", false, "show a breakdown of calls by agent")
+	showDuration = flag.Bool("d", false, "show a breakdown of calls by duration")
+	showHour     = flag.Bool("c", false, "show a breakdown of calls by hour")
+	toFile       = flag.Bool("f", false, "write results to a CSV file")
 )
 
 func handleArgs() error {
 	var e error
 
-	flag.BoolVar(&showAgent, "a", false, "show a breakdown of calls by agent")
-	flag.BoolVar(&showDuration, "d", false, "show a breakdown of calls by duration")
-	flag.BoolVar(&showHour, "c", false, "show a breakdown of calls by hour")
-
 	flag.Parse()
 
-	if !showHour && !showAgent && !showDuration {
-		showHour = true
+	if !*showHour && !*showAgent && !*showDuration {
+		*showHour = true
 	}
 
 	if start, e = formatDateString(flag.Arg(0)); e != nil {

@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 const (
@@ -60,26 +61,54 @@ func main() {
 		return cr.IsCustomerCare
 	})
 
-	if showDuration {
+	if *toFile {
+		ds := time.Now().Format("01-02-06_15:04:05")
+		filePath := fmt.Sprintf("call_graph_%v.csv", ds)
+		switch {
+		case *showDuration:
+			err := WriteToCSV(GraphByDuration(calls), filePath)
+			if err != nil {
+				fmt.Printf("%v\n", err)
+				return
+			}
+			fallthrough
+		case *showAgent:
+			err := WriteToCSV(GraphByAgent(calls), filePath)
+			if err != nil {
+				fmt.Printf("%v\n", err)
+				return
+			}
+			fallthrough
+		case *showHour:
+			err := WriteToCSV(GraphByHour(calls), filePath)
+			if err != nil {
+				fmt.Printf("%v\n", err)
+				return
+			}
+		}
+		fmt.Printf("Wrote results to file %v\n", filePath)
+	}
+
+	switch {
+	case *showDuration:
 		durGraph, err := Draw(GraphByDuration(calls))
 		if err != nil {
 			fmt.Printf("%v\n", err)
 		}
 		fmt.Printf("Durations:\n%v\n\n", durGraph)
-	}
-
-	if showHour {
+		fallthrough
+	case *showHour:
 		hourGraph, err := Draw(GraphByHour(calls))
 		if err != nil {
 			fmt.Printf("%v\n", err)
 		}
 		fmt.Printf("Hours:\n%v\n\n", hourGraph)
-	}
-
-	if showAgent {
+		fallthrough
+	case *showAgent:
 		calls = Filter(calls, func(cr CallRecord) bool {
 			return !cr.IsMissed
 		})
+
 		agentGraph, err := Draw(GraphByAgent(calls))
 		if err != nil {
 			fmt.Printf("%v\n", err)
