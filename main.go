@@ -15,14 +15,14 @@ var (
 func main() {
 	err := handleArgs()
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("handleArgs error: %v\n", err)
 		return
 	}
 
 	// The output of this function depends on the toFile flag.
 	calls, err := getCallsByDate(start, end)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("getCallsByDate error: %v\n", err)
 		return
 	}
 
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	if err := graphOutput(data); err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("graphOutput error: %v\n", err)
 		return
 	}
 }
