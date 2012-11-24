@@ -11,6 +11,8 @@ var (
 	start, end string
 	graphType  = flag.String("g", "hour", "graph by agent, duration or call time")
 	toFile     = flag.Bool("f", false, "write results to a CSV file")
+
+    cpuprofile = flag.String("prof", "", "write cpu profile to file")
 )
 
 func handleArgs() error {
