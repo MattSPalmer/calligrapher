@@ -8,7 +8,7 @@ var (
 	filterCriteria = map[string](func(CallRecord) bool){
 		"customer care":   func(cr CallRecord) bool { return cr.IsCustomerCare },
 		"answered":        func(cr CallRecord) bool { return !cr.IsMissed },
-		"during business": func(cr CallRecord) bool { return cr.IsMissed },
+		"during business": func(cr CallRecord) bool { return cr.DuringHours },
 	}
 )
 
