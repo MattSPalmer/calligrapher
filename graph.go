@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"github.com/MattSPalmer/svgraphs"
+	"github.com/ajstarks/svgo"
 	"os"
 	"sort"
 	"strconv"
@@ -65,6 +67,33 @@ func WriteToCSV(cg CallGraph, fp string) error {
 		return err
 	}
 	w.Flush()
+	return nil
+}
+
+func WriteToSVG(cg CallGraph, fp string) error {
+	f, err := os.Create(fp)
+	defer f.Close()
+
+	dist, err := cg.Distribution()
+	if err != nil {
+		return err
+	}
+	output := make(map[string]int)
+
+	for k, v := range dist {
+		key := strconv.FormatInt(k, 10)
+		output[key] = len(v)
+	}
+	canvas := svg.New(f)
+	g, err := graphs.NewBarGraph(output)
+	if err != nil {
+		return err
+	}
+	canvas.Start(700, 500)
+	defer canvas.End()
+
+	g.Draw(canvas, 30, 30, 600, 400)
+
 	return nil
 }
 

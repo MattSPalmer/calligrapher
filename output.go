@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-const (
-	extension = "csv"
-)
-
 // GetCallsByDate takes two date strings of the format "YYYYMMDD" and returns,
 // if successful, a slice of CallRecords.
 func GetCallsByDate(start, end string) ([]CallRecord, error) {
@@ -60,7 +56,7 @@ func rangeIntoDays(start, end string) ([]timeBlock, error) {
 	return dates, nil
 }
 
-func graphOutput(calls []CallRecord, graphType string, toFile, byDate bool) error {
+func graphOutput(calls []CallRecord, graphType string, toCSV, toSVG, byDate bool) error {
 	var data CallGraph
 
 	switch graphType {
@@ -74,10 +70,20 @@ func graphOutput(calls []CallRecord, graphType string, toFile, byDate bool) erro
 		return fmt.Errorf("invalid graphType specifed: %v", graphType)
 	}
 
-	if toFile {
+	var filePath string
+	if toCSV {
 		ds := time.Now().Format("01-02-06_15:04:05")
-		filePath := fmt.Sprintf("call_graph_%v.%v", ds, extension)
+		filePath = fmt.Sprintf("call_graph_%v.%v", ds, "csv")
 		err := WriteToCSV(data, filePath)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Wrote results to file %v\n\n", filePath)
+	}
+	if toSVG {
+		ds := time.Now().Format("01-02-06_15:04:05")
+		filePath = fmt.Sprintf("call_graph_%v.%v", ds, "svg")
+		err := WriteToSVG(data, filePath)
 		if err != nil {
 			return err
 		}
