@@ -10,6 +10,7 @@ import (
 var (
 	start, end string
 	graphType  = flag.String("g", "hour", "graph by agent, duration or call time")
+	byDate     = flag.Bool("d", false, "split data into separate days")
 	toFile     = flag.Bool("f", false, "write results to a CSV file")
 
     cpuprofile = flag.String("prof", "", "write cpu profile to file")

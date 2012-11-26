@@ -55,6 +55,10 @@ func (tb timeBlock) during(test time.Time) bool {
 	return test.After(tb.start) && test.Before(tb.end)
 }
 
+func (tb timeBlock) String() string {
+	return fmt.Sprintf("Start: %s\nEnd: %s", tb.start, tb.end)
+}
+
 func (cr callRecordFromFile) isCustomerCare() bool {
 	query, err := regexp.Compile("Customer Care")
 	if err != nil {
