@@ -41,7 +41,7 @@ func main() {
 				return cr.Created_at.After(day.start) && cr.Created_at.Before(day.end)
 			})
 			fmt.Println(day.start.Format("Monday, Jan 2 2006"))
-			if err := graphOutput(dayData, *graphType, *toCSV, *toSVG, *byDate); err != nil {
+			if err := graphOutput(dayData, *graphType, *toCSV, *toSVG); err != nil {
 				fmt.Printf("graphOutput error: %v\n", err)
 				return
 			}
@@ -50,7 +50,7 @@ func main() {
 			}
 		}
 	} else {
-		if err := graphOutput(calls, *graphType, *toCSV, *toSVG, *byDate); err != nil {
+		if err := graphOutput(calls, *graphType, *toCSV, *toSVG); err != nil {
 			fmt.Printf("graphOutput error: %v\n", err)
 			return
 		}

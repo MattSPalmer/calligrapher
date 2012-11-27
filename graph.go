@@ -116,7 +116,10 @@ func (bd GraphByDuration) Distribution() (map[int64][]CallRecord, error) {
 	dist := make(map[int64][]CallRecord)
 	var key int64
 	for _, call := range bd {
-		key = call.Duration
+		key = call.Duration - call.Duration % 5
+        if key > 60 {
+            key = 60
+        }
 		dist[key] = append(dist[key], call)
 	}
 	return dist, nil
@@ -167,21 +170,13 @@ func (bd GraphByDuration) DrawRows() (s string, err error) {
 	if err != nil {
 		return
 	}
-	rows := make([]string, 12)
-	for i := 0; i < 12; i++ {
-		rows[i] = fmt.Sprintf("%v|", bd.Labels(int64(i)))
+	rows := make([]string, 13)
+	for i := 0; i < 13; i++ {
+		rows[i] = fmt.Sprintf("%v|", bd.Labels(int64(5*i)))
 	}
 	counts := make(map[int64]int)
 	for k, v := range dist {
-		for _, call := range v {
-			if !call.IsMissed && call.IsCustomerCare {
-				if k/5 > 10 {
-					counts[11] += 1
-				} else {
-					counts[k/5] += 1
-				}
-			}
-		}
+        counts[k/5] = len(v)
 	}
 	for k, v := range counts {
 		rows[k] += fmt.Sprintf(" %d", v)
@@ -209,17 +204,14 @@ func (ba GraphByAgent) DrawRows() (s string, err error) {
 }
 
 func (bh GraphByHour) Labels(v int64) string {
-	if v < 12 {
-		return fmt.Sprintf("%vam", v)
-	}
-	return fmt.Sprintf("%vpm", v%13+1)
+	return fmt.Sprintf("%02v00", v)
 }
 
 func (bd GraphByDuration) Labels(v int64) string {
-	if v == 11 {
+	if v == 60 {
 		return "60+"
 	}
-	return fmt.Sprintf("%02d-%02d", 5*v, 5*(v+1))
+	return fmt.Sprintf("%02d-%02d", v, v+5)
 }
 
 func (ba GraphByAgent) Labels(v int64) string {
