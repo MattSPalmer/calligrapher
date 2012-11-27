@@ -18,6 +18,7 @@ var (
 type CallGraph interface {
 	Distribution() (map[int64][]CallRecord, error)
 	DrawRows() (string, error)
+	Labels(int64) string
 }
 
 func Draw(g CallGraph) (string, error) {
@@ -81,7 +82,7 @@ func WriteToSVG(cg CallGraph, fp string) error {
 	output := make(map[string]int)
 
 	for k, v := range dist {
-		key := strconv.FormatInt(k, 10)
+		key := cg.Labels(k)
 		output[key] = len(v)
 	}
 	canvas := svg.New(f)
@@ -138,16 +139,14 @@ func (bh GraphByHour) DrawRows() (s string, err error) {
 	rows := make([]string, 0)
 	for i := int64(8); i < 21; i++ {
 		// Begin row with the row name (hour)
-		row := fmt.Sprintf("%02v|", i)
+		row := fmt.Sprintf("%4v|", bh.Labels(i))
 
 		// Iterate over calls that occurred in hour i
 		for _, call := range dist[i] {
 			if !call.IsMissed {
+				var char, val string
+
 				// Get first character of agent name
-				var (
-					char string
-					val  string
-				)
 				if val = agentsByID[call.AgentID]; val != "" {
 					char = string(val[0])
 				} else {
@@ -169,13 +168,10 @@ func (bd GraphByDuration) DrawRows() (s string, err error) {
 		return
 	}
 	rows := make([]string, 12)
-	for i := 0; i < 11; i++ {
-		rows[i] = fmt.Sprintf("%02d-%02d|", 5*i, 5*(i+1))
+	for i := 0; i < 12; i++ {
+		rows[i] = fmt.Sprintf("%v|", bd.Labels(int64(i)))
 	}
-	rows[11] = "  60+|"
-	var (
-		counts = make(map[int64]int)
-	)
+	counts := make(map[int64]int)
 	for k, v := range dist {
 		for _, call := range v {
 			if !call.IsMissed && call.IsCustomerCare {
@@ -205,21 +201,37 @@ func (ba GraphByAgent) DrawRows() (s string, err error) {
 		if k == -1 {
 			continue
 		}
-		var agentName string
-		if val, ok := agentsByID[k]; ok {
-			agentName = val
-		} else {
-			agentName = strconv.FormatInt(k, 10)
-		}
+		agentName := ba.Labels(k)
 		rows = append(rows, fmt.Sprintf("%9v|", agentName))
 		rows[len(rows)-1] += fmt.Sprintf(" %d", len(v))
 	}
 	return strings.Join(rows, "\n"), err
 }
 
-type Table [][]string
+func (bh GraphByHour) Labels(v int64) string {
+	if v < 12 {
+		return fmt.Sprintf("%vam", v)
+	}
+	return fmt.Sprintf("%vpm", v%13+1)
+}
+
+func (bd GraphByDuration) Labels(v int64) string {
+	if v == 11 {
+		return "60+"
+	}
+	return fmt.Sprintf("%02d-%02d", 5*v, 5*(v+1))
+}
+
+func (ba GraphByAgent) Labels(v int64) string {
+	if val, ok := agentsByID[v]; ok {
+		return val
+	}
+	return strconv.FormatInt(v, 10)
+}
 
 // Implement sort for Table so we can output nicely sorted CSV files.
+type Table [][]string
+
 func (t Table) Less(i, j int) bool { return t[i][0] < t[j][0] }
 func (t Table) Len() int           { return len(t) }
 func (t Table) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
