@@ -1,12 +1,7 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
-	"github.com/MattSPalmer/svgraphs"
-	"github.com/ajstarks/svgo"
-	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -31,71 +26,6 @@ func Draw(g CallGraph) (string, error) {
 	strSlice = append(strSlice, frameRow, s, frameRow)
 
 	return strings.Join(strSlice, "\n"), nil
-}
-
-func WriteToCSV(cg CallGraph, fp string) error {
-	f, err := os.Create(fp)
-	if err != nil {
-		return err
-	}
-
-	defer f.Close()
-
-	dist, err := cg.Distribution()
-	if err != nil {
-		return err
-	}
-	w := csv.NewWriter(f)
-	t := make(Table, 0)
-	for key, calls := range dist {
-		var sum int64
-		l := int64(len(calls))
-
-		for _, call := range calls {
-			sum += call.Duration
-		}
-
-		keyS := strconv.FormatInt(key, 10)
-		sumS := strconv.FormatInt(sum, 10)
-		avgS := strconv.FormatInt(sum/l, 10)
-		lenS := strconv.FormatInt(l, 10)
-
-		row := []string{keyS, lenS, sumS, avgS}
-		t = append(t, row)
-	}
-	sort.Sort(t)
-	if err = w.WriteAll(t); err != nil {
-		return err
-	}
-	w.Flush()
-	return nil
-}
-
-func WriteToSVG(cg CallGraph, fp string) error {
-	f, err := os.Create(fp)
-	defer f.Close()
-
-	dist, err := cg.Distribution()
-	if err != nil {
-		return err
-	}
-	output := make(map[string]int)
-
-	for k, v := range dist {
-		key := cg.Labels(k)
-		output[key] = len(v)
-	}
-	canvas := svg.New(f)
-	g, err := graphs.NewBarGraph(output)
-	if err != nil {
-		return err
-	}
-	canvas.Start(700, 500)
-	defer canvas.End()
-
-	g.Draw(canvas, 30, 30, 600, 400)
-
-	return nil
 }
 
 type GraphByHour []CallRecord
