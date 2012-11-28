@@ -74,7 +74,7 @@ func graphOutput(calls []CallRecord, graphType string, toCSV, toSVG bool) error 
 
 	if toCSV {
 		ds := time.Now().Format("01-02-06_15:04:05")
-        filePath := fmt.Sprintf("call_graph_%v.%v", ds, "csv")
+		filePath := fmt.Sprintf("call_graph_%v.%v", ds, "csv")
 		err := WriteToCSV(data, filePath)
 		if err != nil {
 			return err
@@ -82,13 +82,13 @@ func graphOutput(calls []CallRecord, graphType string, toCSV, toSVG bool) error 
 		fmt.Printf("Wrote results to file %v\n\n", filePath)
 	}
 	if toSVG {
-        filePath := fmt.Sprintf("calls_%v_%v_%v.%v", graphType, start, pathIncrement, "svg")
+		filePath := fmt.Sprintf("calls_%v_%v_%v.%v", graphType, start, pathIncrement, "svg")
 		err := WriteToSVG(data, filePath)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("Wrote results to file %v\n\n", filePath)
-        pathIncrement++
+		pathIncrement++
 	}
 
 	graph, err := Draw(data)

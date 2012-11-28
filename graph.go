@@ -116,10 +116,10 @@ func (bd GraphByDuration) Distribution() (map[int64][]CallRecord, error) {
 	dist := make(map[int64][]CallRecord)
 	var key int64
 	for _, call := range bd {
-		key = call.Duration - call.Duration % 5
-        if key > 60 {
-            key = 60
-        }
+		key = call.Duration - call.Duration%5
+		if key > 60 {
+			key = 60
+		}
 		dist[key] = append(dist[key], call)
 	}
 	return dist, nil
@@ -176,7 +176,7 @@ func (bd GraphByDuration) DrawRows() (s string, err error) {
 	}
 	counts := make(map[int64]int)
 	for k, v := range dist {
-        counts[k/5] = len(v)
+		counts[k/5] = len(v)
 	}
 	for k, v := range counts {
 		rows[k] += fmt.Sprintf(" %d", v)
