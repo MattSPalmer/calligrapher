@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func WriteToSVG(cg CallGraph, fp string) error {
+func barGraph(cg CallGraph, fp string) error {
 	f, err := os.Create(fp)
 	if err != nil {
 		return err

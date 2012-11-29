@@ -83,7 +83,7 @@ func graphOutput(calls []CallRecord, graphType string, toCSV, toSVG bool) error 
 	}
 	if toSVG {
 		filePath := fmt.Sprintf("calls_%v_%v_%v.%v", graphType, start, pathIncrement, "svg")
-		err := WriteToSVG(data, filePath)
+		err := barGraph(data, filePath)
 		if err != nil {
 			return err
 		}
