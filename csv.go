@@ -7,6 +7,13 @@ import (
 	"strconv"
 )
 
+// Implement sort for Table so we can output nicely sorted CSV files.
+type Table [][]string
+
+func (t Table) Less(i, j int) bool { return t[i][0] < t[j][0] }
+func (t Table) Len() int           { return len(t) }
+func (t Table) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+
 func WriteToCSV(cg CallGraph, fp string) error {
 	f, err := os.Create(fp)
 	if err != nil {

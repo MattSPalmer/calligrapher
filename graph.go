@@ -150,10 +150,3 @@ func (ba GraphByAgent) Labels(v int64) string {
 	}
 	return strconv.FormatInt(v, 10)
 }
-
-// Implement sort for Table so we can output nicely sorted CSV files.
-type Table [][]string
-
-func (t Table) Less(i, j int) bool { return t[i][0] < t[j][0] }
-func (t Table) Len() int           { return len(t) }
-func (t Table) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
