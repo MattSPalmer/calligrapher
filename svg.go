@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/MattSPalmer/svgraphs"
 	"github.com/ajstarks/svgo"
 	"os"
 )
+
+var colors = []string{"red", "blue", "pink", "purple", "orange"}
 
 func barGraph(cg CallGraph, fp string) error {
 	f, err := os.Create(fp)
@@ -49,11 +52,13 @@ func durationStackGraph(w, h int, m map[string][]timeBlock, fp string) error {
 
 	rh := (h - (10*len(m) + 60)) / len(m)
 	i := 30
+	nextColor := colorer()
 	for _, blocks := range m {
+		style := fmt.Sprintf("fill:%v", nextColor())
 		for _, b := range blocks {
 			start := w * (60*b.start.Hour() + b.start.Minute() - 540) / 660
 			pixelW := w * int(b.Duration().Minutes()) / 660
-			canvas.Rect(start, i-rh/2, pixelW, rh)
+			canvas.Rect(start, i-rh/2, pixelW, rh, style)
 		}
 		i += rh + 10
 	}
@@ -78,4 +83,12 @@ func mapCallTime(calls []CallRecord) (map[string][]timeBlock, error) {
 		m[name] = b
 	}
 	return m, nil
+}
+
+func colorer() func() string {
+	i := -1
+	return func() string {
+		i += 1
+		return colors[i%len(colors)]
+	}
 }
