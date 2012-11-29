@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 var (
@@ -28,6 +29,18 @@ func main() {
 	}
 
 	calls = Filter(calls, filterCriteria["customer care"])
+
+	if *test {
+		t := time.Now()
+		m, err := mapCallTime(calls)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return
+		}
+		durationStackGraph(3000, 500, m, "moo.svg")
+		fmt.Printf("%v\n", time.Since(t))
+		return
+	}
 
 	if *byDate {
 		days, err := rangeIntoDays(start, end)

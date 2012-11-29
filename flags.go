@@ -13,6 +13,8 @@ var (
 	byDate     = flag.Bool("d", false, "split data into separate days")
 	toCSV      = flag.Bool("f", false, "write results to a CSV file")
 	toSVG      = flag.Bool("s", false, "create a graph in SVG format")
+
+	test = flag.Bool("t", false, "create a graph in SVG format")
 )
 
 func handleArgs() error {
