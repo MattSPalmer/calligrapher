@@ -55,8 +55,12 @@ func (tb timeBlock) during(test time.Time) bool {
 	return test.After(tb.start) && test.Before(tb.end)
 }
 
+func (tb timeBlock) Duration() time.Duration {
+	return tb.end.Sub(tb.start)
+}
+
 func (tb timeBlock) String() string {
-	return fmt.Sprintf("Start: %s\nEnd: %s", tb.start, tb.end)
+	return fmt.Sprintf("Start: %s End: %s", tb.start.Format("15:04"), tb.end.Format("15:04"))
 }
 
 func (cr callRecordFromFile) isCustomerCare() bool {
@@ -90,6 +94,13 @@ func (cr callRecordFromFile) convert() (out CallRecord, err error) {
 	}
 	out.DuringHours = schedule[out.Created_at.Weekday()].during(out.Created_at)
 	return
+}
+
+func (cr CallRecord) Interval() *timeBlock {
+	if cr.Duration == 0 && cr.AgentID != -1 {
+		cr.Duration = 1
+	}
+	return &timeBlock{cr.Created_at, cr.Created_at.Add(time.Duration(cr.Duration * 60E9))}
 }
 
 func batchConvert(fromFile []callRecordFromFile) ([]CallRecord, error) {
