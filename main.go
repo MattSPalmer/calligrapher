@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"time"
 )
 
 var (
@@ -42,6 +43,18 @@ func main() {
 
 	calls = Filter(calls, filterCriteria["customer care"])
 
+	if *test {
+		t := time.Now()
+		m, err := mapCallTime(calls)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return
+		}
+		durationStackGraph(3000, 500, m, "moo.svg")
+		fmt.Printf("%v\n", time.Since(t))
+		return
+	}
+
 	if *byDate {
 		days, err := rangeIntoDays(start, end)
 		if err != nil {
@@ -54,7 +67,7 @@ func main() {
 				return cr.Created_at.After(day.start) && cr.Created_at.Before(day.end)
 			})
 			fmt.Println(day.start.Format("Monday, Jan 2 2006"))
-			if err := graphOutput(dayData, *graphType, *toFile, *byDate); err != nil {
+			if err := graphOutput(dayData, *graphType, *toCSV, *toSVG); err != nil {
 				fmt.Printf("graphOutput error: %v\n", err)
 				return
 			}
@@ -63,7 +76,7 @@ func main() {
 			}
 		}
 	} else {
-		if err := graphOutput(calls, *graphType, *toFile, *byDate); err != nil {
+		if err := graphOutput(calls, *graphType, *toCSV, *toSVG); err != nil {
 			fmt.Printf("graphOutput error: %v\n", err)
 			return
 		}
