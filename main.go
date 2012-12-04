@@ -39,11 +39,10 @@ func main() {
 		durationStackGraph(2400, 405, m, "temp.svg")
 	case *testDensity:
 		calls = Filter(calls, filterCriteria["answered"])
-		density := callDensity(calls)
-		for i := 0; i < len(density); i++ {
-			if density[i] > 3 {
-				fmt.Printf("%v: %v\n", i, density[i])
-			}
+		err := callDensity(2400, 405, calls, "tempDensity.svg")
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return
 		}
 	case *byDate:
 		days, err := rangeIntoDays(start, end)

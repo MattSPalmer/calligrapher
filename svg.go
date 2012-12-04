@@ -99,17 +99,33 @@ func colorer() func() string {
 	}
 }
 
-func callDensity(calls []CallRecord) []int {
+func callDensity(w, h int, calls []CallRecord, fp string) error {
+	f, err := os.Create(fp)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	canvas := svg.New(f)
+	canvas.Start(w, h)
+	defer canvas.End()
+
+	canvas.Grid(0, 0, w, h, 30, "stroke-width:3;fill:black;opacity:10%")
+
 	density := make([]int, 1440)
 	for _, call := range calls {
 		a := timeToMins(call.Interval().start)
 		b := timeToMins(call.Interval().end)
-		fmt.Printf("%v, %v\n", a, b)
-		for i := a; i < b; i++ {
+
+		for i := a; i < b-1; i++ {
 			density[i] += 1
 		}
 	}
-	return density[539:1200]
+	density = density[539:1200]
+	for i := 0; i < len(density); i++ {
+		canvas.Rect(w*(i+1)/660+10, h-(30*density[i]), w/660, 30*density[i])
+	}
+	return nil
 }
 
 func timeToMins(t time.Time) int { return 60*t.Hour() + t.Minute() }
