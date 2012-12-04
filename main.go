@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 var (
@@ -30,19 +29,23 @@ func main() {
 
 	calls = Filter(calls, filterCriteria["customer care"])
 
-	if *test {
-		t := time.Now()
+	switch {
+	case *testStack:
 		m, err := mapCallTime(calls)
 		if err != nil {
 			fmt.Printf("%v\n", err)
 			return
 		}
-		durationStackGraph(3000, 500, m, "moo.svg")
-		fmt.Printf("%v\n", time.Since(t))
-		return
-	}
-
-	if *byDate {
+		durationStackGraph(2400, 405, m, "temp.svg")
+	case *testDensity:
+		calls = Filter(calls, filterCriteria["answered"])
+		density := callDensity(calls)
+		for i := 0; i < len(density); i++ {
+			if density[i] > 3 {
+				fmt.Printf("%v: %v\n", i, density[i])
+			}
+		}
+	case *byDate:
 		days, err := rangeIntoDays(start, end)
 		if err != nil {
 			fmt.Println(err)
@@ -62,10 +65,9 @@ func main() {
 				fmt.Scanln()
 			}
 		}
-	} else {
+	default:
 		if err := graphOutput(calls, *graphType, *toCSV, *toSVG); err != nil {
 			fmt.Printf("graphOutput error: %v\n", err)
-			return
 		}
 	}
 }
