@@ -55,7 +55,7 @@ func durationStackGraph(w, h int, m map[string][]timeBlock, fp string) error {
 	rh = rh - (rh % 30)
 	nextColor := colorer()
 
-	canvas.Grid(0, 0, w, h, 30, "stroke-width:3;fill:black;opacity:10%")
+	// canvas.Grid(0, 0, w, h, 30, "stroke-width:3;fill:black;opacity:10%")
 
 	var i int
 	for _, blocks := range m {
