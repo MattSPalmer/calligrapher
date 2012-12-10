@@ -43,10 +43,7 @@ func handleArgs() error {
 }
 
 func formatDateString(s string) (string, error) {
-	pattern, err := regexp.Compile("(20[0-9]{2})?[/-]?([0-3][0-9])[/-]?([0-9]{2})")
-	if err != nil {
-		return "", err
-	}
+	pattern, _ := regexp.Compile("(20[0-9]{2})?[/-]?([0-3][0-9])[/-]?([0-9]{2})")
 	if e := pattern.FindStringSubmatch(s); len(e) > 2 && len(e) < 5 {
 		s = strings.Join(e[1:len(e)], "")
 		if len(s) == 8 {
