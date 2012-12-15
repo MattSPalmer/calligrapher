@@ -14,8 +14,9 @@ var (
 	toCSV      = flag.Bool("f", false, "write results to a CSV file")
 	toSVG      = flag.Bool("s", false, "create a graph in SVG format")
 
-	testStack   = flag.Bool("t", false, "")
-	testDensity = flag.Bool("n", false, "")
+	testStack     = flag.Bool("t", false, "")
+	testDensity   = flag.Bool("n", false, "")
+	testCallbacks = flag.Bool("c", false, "")
 )
 
 func handleArgs() error {

@@ -10,6 +10,7 @@ var (
 	filterCriteria = map[string](func(CallRecord) bool){
 		"customer care":   func(cr CallRecord) bool { return cr.IsCustomerCare },
 		"answered":        func(cr CallRecord) bool { return !cr.IsMissed },
+		"missed":          func(cr CallRecord) bool { return cr.IsMissed },
 		"during business": func(cr CallRecord) bool { return cr.DuringHours },
 	}
 )
@@ -30,6 +31,9 @@ func main() {
 	calls = Filter(calls, filterCriteria["customer care"])
 
 	switch {
+	case *testCallbacks:
+		fmt.Printf("%v\n", getCallbacks(calls))
+
 	case *testStack:
 		m, err := mapCallTime(calls)
 		if err != nil {
